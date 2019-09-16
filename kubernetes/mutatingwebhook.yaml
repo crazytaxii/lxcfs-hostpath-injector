@@ -1,0 +1,19 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: lxcfs-sidecar-injector-cfg
+  labels:
+    app: lxcfs-sidecar-injector
+webhooks:
+  - name: sidecar-injector.morven.me
+    clientConfig:
+      service:
+        name: lxcfs-sidecar-injector-svc
+        namespace: default
+        path: /mutate
+      caBundle: ${CA_BUNDLE}
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: ["*"]
+        apiVersions: ["v1"]
+        resources: ["pods"]
