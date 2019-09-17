@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	DefaultConfigFile                   = ""                              // default config file
+	DefaultConfigFile                   = "config.yaml"                   // default config file
 	DefaultAnnotation                   = "sidecar-injector.lxcfs/inject" // default annotation
 	DefaultNamespace                    = "default"                       // default namespace
 	DefaultAnnotationRequired           = true                            // annotation is required
@@ -65,6 +65,7 @@ func addToScheme(scheme *runtime.Scheme) {
 	utilruntime.Must(v1beta1.AddToScheme(scheme))
 }
 
+// Load and parse config file.
 func LoadWebhookServerConfig(cfgFile string) (*Config, error) {
 	var cfg *Config
 	if len(cfgFile) != 0 {
@@ -87,6 +88,7 @@ func LoadWebhookServerConfig(cfgFile string) (*Config, error) {
 		}
 	}
 
+	// default volume mount paths and volumes
 	cfg.SidecarConfig = &SidecarConfig{
 		VolumeMounts: []corev1.VolumeMount{
 			{
@@ -169,7 +171,7 @@ func LoadWebhookServerConfig(cfgFile string) (*Config, error) {
 	return cfg, nil
 }
 
-// Mutate method for webhook server
+// Mutate method for webhook server.
 func (whsvr *WebhookServer) Mutate(w http.ResponseWriter, r *http.Request) {
 	var body []byte
 	if r.Body != nil {
@@ -191,9 +193,9 @@ func (whsvr *WebhookServer) Mutate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	klog.V(2).Info("handling request: %s", body)
+	klog.Info("handling request: %s", body)
 
-	// The AdmissionReview that was sent to the webhook
+	// The AdmissionReview that was sent to the webhook.
 	requestedAdmissionReview := &v1beta1.AdmissionReview{}
 
 	var admissionResponse *v1beta1.AdmissionResponse
@@ -206,7 +208,7 @@ func (whsvr *WebhookServer) Mutate(w http.ResponseWriter, r *http.Request) {
 		admissionResponse = whsvr.mutate(requestedAdmissionReview)
 	}
 
-	// The AdmissionReview that will be returned
+	// The AdmissionReview that will be returned.
 	responseAdmissionReview := &v1beta1.AdmissionReview{}
 	if admissionResponse != nil {
 		responseAdmissionReview.Response = admissionResponse
@@ -215,7 +217,7 @@ func (whsvr *WebhookServer) Mutate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	klog.V(2).Info(fmt.Sprintf("sending response: %v", responseAdmissionReview.Response))
+	klog.Info(fmt.Sprintf("sending response: %v", responseAdmissionReview.Response))
 
 	resp, err := json.Marshal(responseAdmissionReview)
 	if err != nil {
@@ -246,7 +248,6 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 		}
 	}
 
-	klog.Info("Mutating pod")
 	annotations := map[string]string{admissionWebhookAnnotationStatusKey: "injected"}
 	patchBytes, err := createPatch(&pod, whsvr.Config.SidecarConfig, annotations)
 	if err != nil {
@@ -264,6 +265,7 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 	}
 }
 
+// Check annotation in API object.
 func (whsvr *WebhookServer) mutationRequired(metadata *metav1.ObjectMeta) bool {
 	if !whsvr.Config.AnnotationRequied {
 		return false
@@ -285,6 +287,7 @@ func (whsvr *WebhookServer) mutationRequired(metadata *metav1.ObjectMeta) bool {
 	return required
 }
 
+// Create patch for adding volume mount.
 func addVolumeMount(target []corev1.Container, added []corev1.VolumeMount, basePath string) (patch []patchOperation) {
 	for i, c := range target {
 		target[i].VolumeMounts = append(c.VolumeMounts, added...)
@@ -297,6 +300,7 @@ func addVolumeMount(target []corev1.Container, added []corev1.VolumeMount, baseP
 	})
 }
 
+// Create patch for adding volume.
 func addVolume(target, added []corev1.Volume, basePath string) (patch []patchOperation) {
 	first := len(target) == 0
 	var value interface{}
@@ -318,6 +322,7 @@ func addVolume(target, added []corev1.Volume, basePath string) (patch []patchOpe
 	return patch
 }
 
+// Create patch for updating annotation.
 func updateAnnotation(target map[string]string, added map[string]string) (patch []patchOperation) {
 	for key, value := range added {
 		if target == nil || target[key] == "" {
@@ -340,7 +345,7 @@ func updateAnnotation(target map[string]string, added map[string]string) (patch 
 	return patch
 }
 
-// create mutation patch for resoures
+// Create mutation patch for resoures.
 func createPatch(pod *corev1.Pod, cfg *SidecarConfig, annotations map[string]string) ([]byte, error) {
 	var patch []patchOperation
 
@@ -354,8 +359,7 @@ func createPatch(pod *corev1.Pod, cfg *SidecarConfig, annotations map[string]str
 	return json.Marshal(patch)
 }
 
-// toAdmissionResponseErr() is a helper function to create an AdmissionResponse
-// with an embedded error
+// Helper function for creating an AdmissionResponse with an embedded error.
 func toAdmissionResponseErr(err error) *v1beta1.AdmissionResponse {
 	return &v1beta1.AdmissionResponse{
 		Result: &metav1.Status{

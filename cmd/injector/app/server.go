@@ -17,9 +17,9 @@ import (
 )
 
 const (
-	defaultPort     = 443
-	defaultCertFile = "/etc/webhook/certs/cert.pem"
-	defaultKeyFile  = "/etc/webhook/certs/key.pem"
+	defaultPort     = 443                           // default port listening
+	defaultCertFile = "/etc/webhook/certs/cert.pem" // default path 4 certficate pem
+	defaultKeyFile  = "/etc/webhook/certs/key.pem"  // default path 4 key pem
 )
 
 // ServerRunOptions runs this webhook server.
@@ -30,11 +30,12 @@ type ServerRunOptions struct {
 	ConfigFile string
 }
 
+// Create a *cobra.Command object with default parameters.
 func NewMutateWebhookServer() *cobra.Command {
 	opt := &ServerRunOptions{}
 	cmd := &cobra.Command{
 		Use:   "webhook-server",
-		Short: "",
+		Short: "Kubernetest mutate webhook server for lxcfs injecting.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return run(opt)
 		},
@@ -57,6 +58,8 @@ func (opt *ServerRunOptions) addFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&opt.ConfigFile, "sidecar-config-file", webhook.DefaultConfigFile, "File containing sidecar configuration")
 }
 
+// Running the specified API Server.
+// This should never exit.
 func run(opt *ServerRunOptions) error {
 	// config for webhook server
 	cfg, err := webhook.LoadWebhookServerConfig(opt.ConfigFile)
@@ -97,6 +100,6 @@ func run(opt *ServerRunOptions) error {
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
 	<-signalChan
 
-	klog.Infof("Got OS shutdown signal, shutting down wenhook server gracefully...")
+	klog.Infof("Got OS shutdown signal, shutting down wenhook server.")
 	return whsvr.Server.Shutdown(context.Background())
 }

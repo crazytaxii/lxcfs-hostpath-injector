@@ -4,32 +4,32 @@ lxcfs-sidecar-injector 利用 Admission Controller 对请求的资源对象修�
 
 ## 如何开启 Admission Controller
 
-在 Kubernetes API server 的启动参数中带上：
-
-```
---enable-admission-plugins=ValidatingAdmissionWebhook,MutatingAdmissionWebhook
-```
+在 Kubernetes API server 的启动参数中带上 `--enable-admission-plugins=ValidatingAdmissionWebhook,MutatingAdmissionWebhook`
 
 > `–-admission-control` 在 1.10 版本中就被废除，取而代之的是 `–-enable-admission-plugins`。
 
-## 构建 & 部署
+## 构建 lxcfs-sidecar-injector
+
+**需要提前配置好 Golang 环境！**
 
 ```bash
-git clone https://github.com/crazytaxii/lxcfs-sidecar-injector.git
-cd lxcfs-sidecar-injector
-export GO111MODULE=on
-make build
-make image
+$ git clone https://github.com/crazytaxii/lxcfs-sidecar-injector.git
+$ cd lxcfs-sidecar-injector
+$ export GO111MODULE=on
+$ make build
+$ make image
 ```
+
+## 部署 lxcfs-sidecar-injector
 
 ```bash
 ./kubernetes/webhook-create-signed-cert.sh
 cat ./kubernetes/mutatingwebhook.yaml |\
     ./kubernetes/webhook-patch-ca-bundle.sh >\
-    ./kubernetes/mutatingwebhook-ca-bundle.yaml
+    ./kubernetes/mutatingwebhookconfigurations.yaml
 kubectl apply -f ./kubernetes/deployment.yaml
 kubectl apply -f ./kubernetes/service.yaml
-kubectl apply -f ./kubernetes/mutatingwebhook-ca-bundle.yaml
+kubectl apply -f ./kubernetes/mutatingwebhookconfigurations.yaml
 ```
 
 使用时需要给 pod 带上 annotation `sidecar-injector.lxcfs/inject: "true"`：
