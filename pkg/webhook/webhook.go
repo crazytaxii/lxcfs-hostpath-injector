@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	DefaultConfigFile                   = "config.yaml"                   // default config file
+	DefaultConfigFile                   = ""                              // default config file
 	DefaultAnnotation                   = "sidecar-injector.lxcfs/inject" // default annotation
 	DefaultNamespace                    = "default"                       // default namespace
 	DefaultAnnotationRequired           = true                            // annotation is required
@@ -69,6 +69,7 @@ func addToScheme(scheme *runtime.Scheme) {
 func LoadWebhookServerConfig(cfgFile string) (*Config, error) {
 	var cfg *Config
 	if len(cfgFile) != 0 {
+		cfg = &Config{}
 		cfg.ConfigFile = cfgFile
 		data, err := ioutil.ReadFile(cfgFile)
 		if err != nil {
@@ -193,7 +194,7 @@ func (whsvr *WebhookServer) Mutate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	klog.Info("handling request: %s", body)
+	klog.Infof("handling request: %s", body)
 
 	// The AdmissionReview that was sent to the webhook.
 	requestedAdmissionReview := &v1beta1.AdmissionReview{}
@@ -217,7 +218,7 @@ func (whsvr *WebhookServer) Mutate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	klog.Info(fmt.Sprintf("sending response: %v", responseAdmissionReview.Response))
+	klog.Infof("sending response: %v", responseAdmissionReview.Response)
 
 	resp, err := json.Marshal(responseAdmissionReview)
 	if err != nil {
