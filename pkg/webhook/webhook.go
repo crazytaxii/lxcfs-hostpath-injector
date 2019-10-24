@@ -225,7 +225,8 @@ func (whsvr *WebhookServer) Mutate(w http.ResponseWriter, r *http.Request) {
 		klog.Errorf("Can't encode response: %v", err)
 		http.Error(w, fmt.Sprintf("could not encode response: %v", err), http.StatusInternalServerError)
 	}
-	if _, err := w.Write(resp); err != nil {
+	_, err = w.Write(resp)
+	if err != nil {
 		klog.Errorf("Can't write response: %v", err)
 		http.Error(w, fmt.Sprintf("could not encode response: %v", err), http.StatusInternalServerError)
 	}
@@ -239,8 +240,8 @@ func (whsvr *WebhookServer) mutate(ar *v1beta1.AdmissionReview) *v1beta1.Admissi
 		return toAdmissionResponseErr(err)
 	}
 
-	klog.Infof("AdmissionReview for Kind=%v, Namespace=%v Name=%v (%v) UID=%v patchOperation=%v UserInfo=%v",
-		req.Kind, req.Namespace, req.Name, pod.Name, req.UID, req.Operation, req.UserInfo)
+	klog.Infof("AdmissionReview for Kind=%v, Namespace=%v Name=%v UID=%v patchOperation=%v UserInfo=%v",
+		req.Kind, req.Namespace, req.Name, req.UID, req.Operation, req.UserInfo)
 
 	if !whsvr.mutationRequired(&pod.ObjectMeta) {
 		klog.Info("Skipping mutation")
