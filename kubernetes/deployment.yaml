@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: lxcfs-sidecar-injector
-          image: lxcfs-sidecar-injector:latest
+          image: crazytaxii/lxcfs-sidecar-injector:latest
           imagePullPolicy: IfNotPresent
           args:
             - --tls-cert-file=/etc/webhook/certs/cert.pem

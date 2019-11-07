@@ -22,17 +22,19 @@ $ make image
 
 ## 部署 lxcfs-sidecar-injector
 
+**需要提前部署好 lxcfs 守护进程！**
+
 ```bash
-./kubernetes/webhook-create-signed-cert.sh
-cat ./kubernetes/mutatingwebhook.yaml |\
+$ ./kubernetes/webhook-create-signed-cert.sh
+$ cat ./kubernetes/mutatingwebhook.yaml |\
     ./kubernetes/webhook-patch-ca-bundle.sh >\
     ./kubernetes/mutatingwebhookconfigurations.yaml
-kubectl apply -f ./kubernetes/deployment.yaml
-kubectl apply -f ./kubernetes/service.yaml
-kubectl apply -f ./kubernetes/mutatingwebhookconfigurations.yaml
+$ kubectl apply -f ./kubernetes/deployment.yaml
+$ kubectl apply -f ./kubernetes/service.yaml
+$ kubectl apply -f ./kubernetes/mutatingwebhookconfigurations.yaml
 ```
 
-使用时需要给 pod 带上 annotation `sidecar-injector.lxcfs/inject: "true"`：
+给 pod 带上 annotation `sidecar-injector.lxcfs/inject: "true"` 即可完成 hostPath 注入：
 
 ```yaml
 spec:

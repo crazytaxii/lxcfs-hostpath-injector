@@ -7,6 +7,9 @@ TAG ?= latest
 GOOS ?= linux
 GOARCH ?= amd64
 CGO_ENABLED ?= 0
+REPO_URL ?= $(shell git remote get-url origin)
+BRANCH ?= $(shell git branch --show-current)
+COMMIT_REF ?= $(shell git rev-parse --verify HEAD)
 
 build:
 	go build -o $(ODIR)/$(TARGET) ./cmd/injector

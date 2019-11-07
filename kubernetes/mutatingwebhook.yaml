@@ -5,7 +5,7 @@ metadata:
   labels:
     app: lxcfs-sidecar-injector
 webhooks:
-  - name: lxcfs-sidecar-injector.crazytaxii.com
+  - name: lxcfs-sidecar-injector-svc.default.svc.cluster.local
     clientConfig:
       service:
         name: lxcfs-sidecar-injector-svc
@@ -13,7 +13,7 @@ webhooks:
         path: /mutate
       caBundle: ${CA_BUNDLE}
     rules:
-      - operations: [ "CREATE" ]
+      - operations: ["CREATE"]
         apiGroups: ["*"]
         apiVersions: ["v1"]
         resources: ["pods"]
