@@ -44,6 +44,16 @@ spec:
         sidecar-injector.lxcfs/inject: "true"
 ```
 
+## 测试 lxcfs hostPath 注入
+
 ```bash
-kubectl apply -f ./kubernetes/test-deloyment.yaml
+$ kubectl apply -f ./kubernetes/test-deloyment.yaml
+```
+
+```bash
+$ kubectl exec -it $(kubectl get pod -l app=web -o jsonpath="{.items[0].metadata.name}") -- free -h
+             total       used       free     shared    buffers     cached
+Mem:          256M       2.9M       253M         0B         0B       364K
+-/+ buffers/cache:       2.5M       253M
+Swap:           0B         0B         0B
 ```
