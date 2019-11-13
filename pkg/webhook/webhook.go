@@ -194,13 +194,9 @@ func (whsvr *WebhookServer) Mutate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	klog.Infof("handling request: %s", body)
-
 	// The AdmissionReview that was sent to the webhook.
 	requestedAdmissionReview := &v1beta1.AdmissionReview{}
-
 	var admissionResponse *v1beta1.AdmissionResponse
-
 	if _, _, err := deserializer.Decode(body, nil, requestedAdmissionReview); err != nil {
 		klog.Errorf("Can't decode body: %v", err)
 		admissionResponse = toAdmissionResponseErr(err)
@@ -217,8 +213,6 @@ func (whsvr *WebhookServer) Mutate(w http.ResponseWriter, r *http.Request) {
 			responseAdmissionReview.Response.UID = requestedAdmissionReview.Request.UID
 		}
 	}
-
-	klog.Infof("sending response: %v", responseAdmissionReview.Response)
 
 	resp, err := json.Marshal(responseAdmissionReview)
 	if err != nil {

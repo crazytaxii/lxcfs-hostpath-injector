@@ -35,7 +35,7 @@ func NewMutateWebhookServer() *cobra.Command {
 	opt := &ServerRunOptions{}
 	cmd := &cobra.Command{
 		Use:   "webhook-server",
-		Short: "Kubernetest mutate webhook server for lxcfs injecting.",
+		Short: "Kubernetest mutate webhook server for lxcfs hostpath injecting.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return run(opt)
 		},
